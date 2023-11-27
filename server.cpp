@@ -117,6 +117,23 @@ void Server::handle_incoming_connections() {
 			if (test_token.test_against_salt(ss.str(), salt_str.substr(1))) {
 				std::cout << "Token " << test_token.name << " has matched" << std::endl;
 				send(client_socket, "P", 1, 0); // Pass
+
+				// Wait for IP (optional)
+				uint8_t compact_ip[4];
+				ssize_t bytesRead = recv(client_socket, compact_ip, 4, 0);
+
+				if (bytesRead > 0) {
+					// I know this is an abomination, but it
+					// works and its 2 AM so it stays here.
+					strcpy(client_ip, (
+							std::to_string(compact_ip[0]) + "." +
+							std::to_string(compact_ip[1]) + "." +
+							std::to_string(compact_ip[2]) + "." +
+							std::to_string(compact_ip[3])
+							).c_str());
+				}
+
+				std::cout << "IP:" << client_ip << std::endl;
 				allow_address(test_token, client_ip);
 				close(client_socket);
 				return;
