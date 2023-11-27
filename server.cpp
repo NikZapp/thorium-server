@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <algorithm>
 
 using Thorium::Server;
 using nlohmann::json;
@@ -20,7 +21,7 @@ Server::Server(uint16_t port, std::string approved_file_path) {
 
 	this->server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->server_socket == -1) {
-		std::cerr << "Error creating socket\n";
+		std::cerr << "Error creating socket" << std::endl;
 		return;
 	}
 	// Set up the server address structure
@@ -31,17 +32,17 @@ Server::Server(uint16_t port, std::string approved_file_path) {
 
 	// Bind the socket
 	if (bind(this->server_socket, (struct sockaddr*)&server_address, sizeof(server_address)) == -1) {
-		std::cerr << "Error binding socket\n";
+		std::cerr << "Error binding socket" << std::endl;
 		return;
 	}
 
 	// Listen for incoming connections
 	if (listen(this->server_socket, 10) == -1) {
-		std::cerr << "Error listening for connections\n";
+		std::cerr << "Error listening for connections" << std::endl;
 		return;
 	}
 
-	std::cout << "Server listening on port " << port << "\n";
+	std::cout << "Server listening on port " << port << std::endl;
 }
 
 void generate_salt(char* buffer) {
@@ -54,7 +55,7 @@ void generate_salt(char* buffer) {
 	for (int i = 0; i < r; i++) {
 		throwaway += rand();
 	}
-	std::cout << "Generating random seed. " << throwaway << "\n";
+	std::cout << "Generating random seed. " << throwaway << std::endl;
 
 	// Generate the buffer
 	buffer[0] = 'K';
@@ -76,8 +77,8 @@ void Server::handle_incoming_connections() {
 	// Convert the client's IP address to a string and print it
 	char client_ip[16];
 	inet_ntop(AF_INET, &(address.sin_addr), client_ip, 16);
-	std::cout << "\n";
-	std::cout << "Client connected from IP address: " << client_ip << "\n";
+	std::cout << std::endl;
+	std::cout << "Client connected from IP address: " << client_ip << std::endl;
 
 	// Set a timeout for the socket
 	struct timeval timeout;
@@ -96,7 +97,7 @@ void Server::handle_incoming_connections() {
 	}
 
 	send(client_socket, salt, 17, 0); // 17 Bytes
-	std::cout << "Sent salt: " << ss.str() << "\n";
+	std::cout << "Sent salt: " << ss.str() << std::endl;
 
 	// Read data from the client
 	char buffer[1024];
@@ -109,27 +110,27 @@ void Server::handle_incoming_connections() {
 		for (int i = 0; i < bytesRead; i++) {
 			ss << std::setw(2) << (int)(uint8_t)(buffer[i]);
 		}
-		std::cout << "Received proof from client: " << ss.str() << "\n";
+		std::cout << "Received proof from client: " << ss.str() << std::endl;
 
 		for (auto& test_token : this->tokens) {
 			std::string salt_str(reinterpret_cast<char *>(salt), sizeof(salt));
 			if (test_token.test_against_salt(ss.str(), salt_str.substr(1))) {
-				std::cout << "Token " << test_token.name << " has matched\n";
-				allow_address(test_token, client_ip);
+				std::cout << "Token " << test_token.name << " has matched" << std::endl;
 				send(client_socket, "P", 1, 0); // Pass
+				allow_address(test_token, client_ip);
 				close(client_socket);
 				return;
 			}
 		}
-		std::cout << "No match found.\n";
+		std::cout << "No match found." << std::endl;
 		send(client_socket, "F", 1, 0); // Fail
 		close(client_socket);
 	} else if (bytesRead == 0) {
-		std::cout << "Connection closed by client\n";
+		std::cout << "Connection closed by client" << std::endl;
 		close(client_socket);
 	} else {
 		// Timeout or error
-		std::cerr << "Error or timeout receiving data from client\n";
+		std::cerr << "Error or timeout receiving data from client" << std::endl;
 		send(client_socket, "T", 1, 0); // Timeout
 		close(client_socket);
 	}
@@ -145,13 +146,13 @@ void Server::allow_address(Thorium::Token token, std::string address) {
 	};
 
 	std::ofstream o("authorized.json");
-	o << std::setw(4) << authorized << "\n";
+	o << std::setw(4) << authorized << std::endl;
 }
 
 void Server::load_tokens_from_file(std::string path) {
 	std::ifstream f(path);
 	json tokens = json::parse(f);
-	std::cout << "Loading tokens from " << path << ":\n";
+	std::cout << "Loading tokens from " << path << ":" << std::endl;
 	for(auto& token : tokens.items()) {
 		this->tokens.push_back(Thorium::Token(token.key(), token.value()["token"], token.value()["level"]));
 
@@ -159,11 +160,11 @@ void Server::load_tokens_from_file(std::string path) {
 		int level_colors[4] = {31, 33, 32, 36};
 		std::cout << "\033[1;" << level_colors[(int)token.value()["level"]] << "m";
 
-		std::cout << token.key() << " " << (std::string)token.value()["token"] << "\n";
+		std::cout << token.key() << " " << (std::string)token.value()["token"] << std::endl;
 	}
 	// Reset color
 	std::cout << "\033[0m";
-	std::cout << "Loaded " << this->tokens.size() << " tokens\n";
+	std::cout << "Loaded " << this->tokens.size() << " tokens" << std::endl;
 }
 
 // Token access levels:
