@@ -48,7 +48,7 @@ The `token` field stores the generated token in hex format, while the `level` fi
 
 When a user asks you to add their token, the `level` should be assigned according to their permissions.
 ## Step 3: Verifying the token
-An official implementation for a verifier written in python is available [here], however, any verifier can be used as long as it follows the protocol implementation.
+An official implementation for a verifier written in python is available [here](https://cdn.discordapp.com/attachments/602689326039433236/1183381683274272949/thorium_client.py), however, any verifier can be used as long as it follows the protocol implementation.
 
 If the token has matched, it is added to a file called `authorized.json`, which looks something like this:
 ```json
