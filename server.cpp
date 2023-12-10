@@ -154,7 +154,7 @@ void Server::handle_incoming_connections() {
 }
 
 void Server::allow_address(Thorium::Token token, std::string address) {
-	std::ifstream f("authorized.json");
+	std::ifstream f(this->approved_file);
 	json authorized = json::parse(f);
 
 	authorized[address] = {
@@ -162,7 +162,7 @@ void Server::allow_address(Thorium::Token token, std::string address) {
 			{"level", token.access_level}
 	};
 
-	std::ofstream o("authorized.json");
+	std::ofstream o(this->approved_file);
 	o << std::setw(4) << authorized << std::endl;
 }
 
