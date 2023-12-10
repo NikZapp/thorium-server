@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-	Thorium::Server *server = new Thorium::Server(22542, "allowed_ips.txt");
+	Thorium::Server *server = new Thorium::Server(22542, "authorized.json");
 	while (true) {
 		server->handle_incoming_connections();
 	}
