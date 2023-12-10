@@ -54,13 +54,13 @@ If the token has matched, it is added to a file called `authorized.json`, which 
 ```json
 {
 	"123.45.67.89": {
-        "level": 3,
-        "name": "Bob"
-    },
+		"level": 3,
+		"name": "Bob"
+	},
 	"234.56.78.90": {
-        "level": 2,
-        "name": "Alice"
-    }
+		"level": 2,
+		"name": "Alice"
+	}
 }
 ```
 # Protocol implementation
